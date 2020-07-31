@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title></title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="./css/bootstrap.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display+SC:wght@700&display=swap" rel="stylesheet">
+  <style>
+    .title {
+      font-family: 'Playfair Display SC', serif;
+    }
+
+    .head {
+      font-family: 'Playfair Display SC', serif;
+      text-align: center;
+      font-size: 80px;
+    }
+
+    .section {
+      color: #039dfc;
+    }
+    
+  </style>
+</head>
+
+<body>
+
+</body>
+<div class="container-fluid">
+  <h1 class="head">Top Stories of Today</h1><br>
+  <div class="row">    
+    <div id = "subhead" class="d-flex flex-wrap"></div>
+  </div>
+</div>
+<script>
+
+  var section = ['arts', 'fashion', 'food', 'health', 'home', 'insider', 'magazine', 'movies', 'nyregion', 'obituaries', 'opinion', 'realestate', 'science', 'sports', 'sundayreview', 'theater', 't-magazine', 'travel', 'upshot', 'us', 'world']
+
+  function template(item) {
+
+    return `
+    <div class="accordion" id="accordionExample">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h2 class="mb-0">
+            <button class="btn btn-link" onclick = "load('${item}')" type="button" data-toggle="collapse" data-target="#${item + "1"}" aria-expanded="true" aria-controls="collapseOne">
+              ${item}
+            </button>
+          </h2>
+        </div>
+    
+        <div id="${item + "1"}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+          <div class = "row">
+            
+            <div class="d-flex flex-wrap" id="${item}">
+                        
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    `
+
+  }
+
+  document.getElementById("subhead").innerHTML = `${section.map(template).join('')}`
+
+  function load(section) {
+    //console.log(section);
+    fetch("https://api.nytimes.com/svc/topstories/v2/" + section + ".json?api-key=sgchbmbz0NtZggg8uccmAWv17MTIeJkO")
+      .then(function (resp) {
+        return resp.json();
+      })
+      .then(function (data) {
+        //console.log(data);
+
+        var month_name = function (dt) {
+          mlist = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+          return mlist[dt.getMonth()];
+        };
+        function template(item1) {
+          //console.log(item.multimedia[4].url);
+          var d = new Date(item1.created_date);
+          return `
+          <div class="col-lg-6">
+              <div class="card">
+                  <div class="row no-gutters">
+                      <div class="col-md-7">
+                          <div class="card-body">
+                              <h6 class="card-title section"><b>${item1.item_type}</b> : <b class="text-capitalize">${item1.section}</b></h6>
+                              <h3 class="card-title title">${item1.title}</h3>                              
+                              <p class="card-text">${month_name(new Date(item1.created_date))} ${d.getDate()}</p>
+                              <p class="card-text">${item1.abstract}</p>
+                              <p class="text-left">${item1.byline}</p>
+                              <a href="${item1.short_url}" target="_blank" rel="noopener noreferrer" class="card-link">Continue reading</a>
+                          </div>
+                      </div>
+                      <div class="col-md-5">
+                          <img src="${item1.multimedia[4].url}" class="card-img" alt="...">
+                      </div>                            
+                  </div>
+              </div>
+              </div>
+              `
+        }
+        //console.log(section)
+        document.getElementById(section).innerHTML = `${data.results.map(template).join('')}`
+
+      });
+  }
+
+</script>
+
+</html>
